@@ -58,6 +58,16 @@ class EPhoneNumber extends CApplicationComponent
     }
     
     /**
+     * Return RFC3966 (http://www.ietf.org/rfc/rfc3966.txt) format
+     *
+     * @return string
+     */
+    public function toRFC3966(PhoneNumber $number)
+    {
+        return $this->_util->format($number, PhoneNumberFormat::RFC3966);
+    }
+    
+    /**
     * Any requests to set or get attributes or call methods on this class that
     * are not found are redirected to the {@link PhoneNumberUtil} object.
     *
