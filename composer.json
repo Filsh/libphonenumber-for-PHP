@@ -1,0 +1,17 @@
+{
+    "name": "mch0lic/libphonenumber-for-php",
+    "description": "Clone of Phone number handling library by Davide Mendolia",
+    "keywords": ["phonenumber", "libphonenumber", "mobile", "validation"],
+    "homepage": "https://github.com/mch0lic/libphonenumber-for-php",
+    "type": "library",
+    "license": "Apache-2.0",
+    "require": {
+        "php": ">=5.2.6"
+    },
+    "target-dir": "libphonenumber",
+    "autoload": {
+        "psr-0": {
+            "libphonenumber": ""
+        }
+    }
+}

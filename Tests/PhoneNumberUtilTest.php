@@ -1,11 +1,34 @@
 <?php
 
-namespace com\google\i18n\phonenumbers;
+namespace libphonenumber\Tests;
 
-require_once dirname(__FILE__) . '/../PhoneNumberUtil.php';
-require_once dirname(__FILE__) . '/../RegionCode.php';
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberUtil;
+use libphonenumber\CountryCodeToRegionCodeMapForTesting;
+use libphonenumber\RegionCode;
+use libphonenumber\PhoneMetadata;
+use libphonenumber\PhoneNumberDesc;
+use libphonenumber\NumberFormat;
+use libphonenumber\PhoneNumberType;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\Matcher;
+use libphonenumber\CountryCodeSource;
+use libphonenumber\NumberParseException;
+use libphonenumber\ValidationResult;
+
 require_once dirname(__FILE__) . '/../PhoneNumber.php';
+require_once dirname(__FILE__) . '/../PhoneNumberUtil.php';
 require_once dirname(__FILE__) . '/../CountryCodeToRegionCodeMapForTesting.php';
+require_once dirname(__FILE__) . '/../RegionCode.php';
+require_once dirname(__FILE__) . '/../PhoneMetadata.php';
+require_once dirname(__FILE__) . '/../PhoneNumberDesc.php';
+require_once dirname(__FILE__) . '/../NumberFormat.php';
+require_once dirname(__FILE__) . '/../PhoneNumberType.php';
+require_once dirname(__FILE__) . '/../PhoneNumberFormat.php';
+require_once dirname(__FILE__) . '/../Matcher.php';
+require_once dirname(__FILE__) . '/../CountryCodeSource.php';
+require_once dirname(__FILE__) . '/../NumberParseException.php';
+require_once dirname(__FILE__) . '/../ValidationResult.php';
 
 /**
  * Test class for PhoneNumberUtil.
@@ -14,7 +37,6 @@ require_once dirname(__FILE__) . '/../CountryCodeToRegionCodeMapForTesting.php';
 class PhoneNumberUtilTest extends \PHPUnit_Framework_TestCase {
 
 	private static $bsNumber = NULL;
-	private static $bsMobile = NULL;
 	private static $internationalTollFree = NULL;
 	private static $sgNumber = NULL;
 	private static $usShortByOneNumber = NULL;
@@ -55,8 +77,6 @@ class PhoneNumberUtilTest extends \PHPUnit_Framework_TestCase {
 	private static function initializePhoneUtilForTesting() {
 		self::$bsNumber = new PhoneNumber();
 		self::$bsNumber->setCountryCode(1)->setNationalNumber(2423651234);
-		self::$bsMobile = new PhoneNumber();
-		self::$bsMobile->setCountryCode(1)->setNationalNumber(2423570000);
 		self::$internationalTollFree = new PhoneNumber();
 		self::$internationalTollFree->setCountryCode(800)->setNationalNumber(12345678);
 		self::$sgNumber = new PhoneNumber();
@@ -859,83 +879,6 @@ class PhoneNumberUtilTest extends \PHPUnit_Framework_TestCase {
 
 	}
 
-	public function testIsPremiumRate() {
-		$this->assertEquals(PhoneNumberType::PREMIUM_RATE, $this->phoneUtil->getNumberType(self::$usPremium));
-
-		$premiumRateNumber = new PhoneNumber();
-		$premiumRateNumber->setCountryCode(39)->setNationalNumber(892123);
-		$this->assertEquals(PhoneNumberType::PREMIUM_RATE,
-			$this->phoneUtil->getNumberType($premiumRateNumber));
-
-		$premiumRateNumber->clear();
-		$premiumRateNumber->setCountryCode(44)->setNationalNumber(9187654321);
-		$this->assertEquals(PhoneNumberType::PREMIUM_RATE,
-			$this->phoneUtil->getNumberType($premiumRateNumber));
-
-		$premiumRateNumber->clear();
-		$premiumRateNumber->setCountryCode(49)->setNationalNumber(9001654321);
-		$this->assertEquals(PhoneNumberType::PREMIUM_RATE,
-			$this->phoneUtil->getNumberType($premiumRateNumber));
-
-		$premiumRateNumber->clear();
-		$premiumRateNumber->setCountryCode(49)->setNationalNumber(90091234567);
-		$this->assertEquals(PhoneNumberType::PREMIUM_RATE,
-			$this->phoneUtil->getNumberType($premiumRateNumber));
-	}
-
-	public function testIsTollFree() {
-		$tollFreeNumber = new PhoneNumber();
-
-		$tollFreeNumber->setCountryCode(1)->setNationalNumber(8881234567);
-		$this->assertEquals(PhoneNumberType::TOLL_FREE,
-			$this->phoneUtil->getNumberType($tollFreeNumber));
-
-		$tollFreeNumber->clear();
-		$tollFreeNumber->setCountryCode(39)->setNationalNumber(803123);
-		$this->assertEquals(PhoneNumberType::TOLL_FREE,
-			$this->phoneUtil->getNumberType($tollFreeNumber));
-
-		$tollFreeNumber->clear();
-		$tollFreeNumber->setCountryCode(44)->setNationalNumber(8012345678);
-		$this->assertEquals(PhoneNumberType::TOLL_FREE,
-			$this->phoneUtil->getNumberType($tollFreeNumber));
-
-		$tollFreeNumber->clear();
-		$tollFreeNumber->setCountryCode(49)->setNationalNumber(8001234567);
-		$this->assertEquals(PhoneNumberType::TOLL_FREE,
-			$this->phoneUtil->getNumberType($tollFreeNumber));
-
-		$this->assertEquals(PhoneNumberType::TOLL_FREE,
-			$this->phoneUtil->getNumberType(self::$internationalTollFree));
-	}
-
-	public function testIsMobile() {
-		$this->assertEquals(PhoneNumberType::MOBILE, $this->phoneUtil->getNumberType(self::$bsMobile));
-		$this->assertEquals(PhoneNumberType::MOBILE, $this->phoneUtil->getNumberType(self::$gbMobile));
-		$this->assertEquals(PhoneNumberType::MOBILE, $this->phoneUtil->getNumberType(self::$itMobile));
-		$this->assertEquals(PhoneNumberType::MOBILE, $this->phoneUtil->getNumberType(self::$arMobile));
-
-		$mobileNumber = new PhoneNumber();
-		$mobileNumber->setCountryCode(49)->setNationalNumber(15123456789);
-		$this->assertEquals(PhoneNumberType::MOBILE, $this->phoneUtil->getNumberType($mobileNumber));
-	}
-
-	public function testIsFixedLine() {
-		$this->assertEquals(PhoneNumberType::FIXED_LINE, $this->phoneUtil->getNumberType(self::$bsNumber));
-		$this->assertEquals(PhoneNumberType::FIXED_LINE, $this->phoneUtil->getNumberType(self::$itNumber));
-		$this->assertEquals(PhoneNumberType::FIXED_LINE, $this->phoneUtil->getNumberType(self::$gbNumber));
-		$this->assertEquals(PhoneNumberType::FIXED_LINE, $this->phoneUtil->getNumberType(self::$deNumber));
-	}
-
-	public function testIsFixedLineAndMobile() {
-		$this->assertEquals(PhoneNumberType::FIXED_LINE_OR_MOBILE, $this->phoneUtil->getNumberType(self::$usNumber));
-
-		$fixedLineAndMobileNumber = new PhoneNumber();
-		$fixedLineAndMobileNumber->setCountryCode(54)->setNationalNumber(1987654321);
-		$this->assertEquals(PhoneNumberType::FIXED_LINE_OR_MOBILE,
-			$this->phoneUtil->getNumberType($fixedLineAndMobileNumber));
-	}
-
 	/**
 	 * 
 	 */
@@ -1047,8 +990,8 @@ class PhoneNumberUtilTest extends \PHPUnit_Framework_TestCase {
 
 		// Test national number bigger than max 32-bit signed integer
 		$inNumber = new PhoneNumber();
-		$inNumber->setCountryCode(91)->setNationalNumber(9876543210);
-		$this->assertEquals($inNumber, $this->phoneUtil->parse("9876543210", RegionCode::IN));
+		$inNumber->setCountryCode(55)->setNationalNumber(9876543210);
+		$this->assertEquals($inNumber, $this->phoneUtil->parse("9876543210", RegionCode::BR));
 	}
 
 	public function testIsAlphaNumber() {

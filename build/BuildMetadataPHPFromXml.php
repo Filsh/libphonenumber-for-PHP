@@ -1,5 +1,5 @@
 <?php
-namespace com\google\i18n\phonenumbers;
+namespace libphonenumber\build;
 
 require_once 'BuildMetadataFromXml.php';
 
@@ -72,7 +72,7 @@ EOT;
 			}
 
 			$data = '<?php' . PHP_EOL . 'return ' . var_export($metadata->toArray(), TRUE) . ';';
-			file_put_contents($filePrefix . "_" . $regionCode . '.php', $data);
+			file_put_contents($filePrefix . "_" . $regionCode, $data);
 		}
 		/*
 
