@@ -20,7 +20,9 @@ In order to start using the formatters you need to configure it for your applica
 Once you have configured the formatted you can use it by calling the format component.
 
 ```php
-$mPhoneNumber = Yii::app()->phoneNumber->parse('+380567934826', 'UA');
+$phoneNumber = Yii::app()->phoneNumber;
+
+$mPhoneNumber = $phoneNumber->parse('+380567934826', 'UA');
 
 $phoneNumber->validate($mPhoneNumber); // 'true' if valid number
 $phoneNumber->toE164($mPhoneNumber); // +380567934826
