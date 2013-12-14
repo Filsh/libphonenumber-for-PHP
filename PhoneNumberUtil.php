@@ -527,7 +527,7 @@ class PhoneNumberUtil {
 	 *	entities
 	 *  <li> some geographical numbers have no area codes.
 	 * </ul>
-	 * @param \libphonenumber\PhoneNumber $number PhoneNumber object for which clients want to know the length of the area code.
+	 * @param \com\google\i18n\phonenumbers\PhoneNumber $number PhoneNumber object for which clients want to know the length of the area code.
 	 * @return int the length of area code of the PhoneNumber object passed in.
 	 */
 	public function getLengthOfGeographicalAreaCode(PhoneNumber $number) {
@@ -578,7 +578,7 @@ class PhoneNumberUtil {
 	 * Refer to the unittests to see the difference between this function and
 	 * {@link #getLengthOfGeographicalAreaCode}.
 	 *
-	 * @param \libphonenumber\PhoneNumber $number the PhoneNumber object for which clients want to know the length of the NDC.
+	 * @param \com\google\i18n\phonenumbers\PhoneNumber $number the PhoneNumber object for which clients want to know the length of the NDC.
 	 * @return int the length of NDC of the PhoneNumber object passed in.
 	 */
 	public function getLengthOfNationalDestinationCode(PhoneNumber $number) {
@@ -677,11 +677,11 @@ class PhoneNumberUtil {
 	 * length 8, this will return TOO_LONG.
 	 */
 	private function testNumberLengthAgainstPattern($numberPattern, $number) {
-		$numberMatcher =  preg_match('/^(' . $numberPattern . ')$/x', $number);
+		$numberMatcher =  preg_match('/^' . $numberPattern . '$/', $number);
 		if ($numberMatcher > 0) {
 			return ValidationResult::IS_POSSIBLE;
 		}
-		$numberMatcher =  preg_match('/^(' . $numberPattern . ')/x', $number);
+		$numberMatcher =  preg_match('/^' . $numberPattern . '/', $number);
 		if ($numberMatcher > 0) {
 			return ValidationResult::TOO_LONG;
 		} else {
@@ -796,8 +796,8 @@ class PhoneNumberUtil {
 				// If the number was not valid before but is valid now, or if it was too long before, we
 				// consider the number with the country calling code stripped to be a better result and
 				// keep that instead.
-				if ((preg_match('/^(' . $validNumberPattern . ')$/x', $fullNumber) == 0 &&
-					preg_match('/^(' . $validNumberPattern . ')$/x', $potentialNationalNumber) > 0) ||
+				if ((preg_match('/' . $validNumberPattern . '/', $fullNumber) == 0 &&
+					preg_match('/' . $validNumberPattern . '/', $potentialNationalNumber) > 0) ||
 					$this->testNumberLengthAgainstPattern($possibleNumberPattern, (string)$fullNumber)
 						== ValidationResult::TOO_LONG) {
 					$nationalNumber .= $potentialNationalNumber;
@@ -1029,11 +1029,11 @@ class PhoneNumberUtil {
 	 *                               no default region was supplied and the number is not in
 	 *                               international format (does not start with +)
 	 */
-	public function  parse($numberToParse, $defaultRegion, PhoneNumber $phoneNumber = NULL, $keepRawInput = false) {
+	public function  parse($numberToParse, $defaultRegion, PhoneNumber $phoneNumber = NULL) {
 		if ($phoneNumber === NULL) {
 			$phoneNumber = new PhoneNumber();
 		}
-		$this->parseHelper($numberToParse, $defaultRegion, $keepRawInput, true, $phoneNumber);
+		$this->parseHelper($numberToParse, $defaultRegion, false, true, $phoneNumber);
 		return $phoneNumber;
 	}
 
@@ -1849,7 +1849,7 @@ class PhoneNumberUtil {
 	 * Gets the national significant number of the a phone number. Note a national significant number
 	 * doesn't contain a national prefix or any formatting.
 	 *
-	 * @param \libphonenumber\PhoneNumber $number the phone number for which the national significant number is needed
+	 * @param \com\google\i18n\phonenumbers\PhoneNumber $number the phone number for which the national significant number is needed
 	 * @return string  the national significant number of the PhoneNumber object passed in
 	 */
 	public function getNationalSignificantNumber(PhoneNumber $number) {
@@ -2072,7 +2072,7 @@ class PhoneNumberUtil {
 	$metadata = $this->getMetadataForRegionOrCallingCode($number->getCountryCode(), $regionCode);
 	return $this->getNumberTypeHelper($nationalSignificantNumber, $metadata);
 	}
-	 * @param \libphonenumber\PhoneNumber $number the number the phone number that we want to know the type
+	 * @param \com\google\i18n\phonenumbers\PhoneNumber $number the number the phone number that we want to know the type
 	 * @return PhoneNumberType the type of the phone number
 	 */
 	public function getNumberType(PhoneNumber $number) {
@@ -2087,7 +2087,7 @@ class PhoneNumberUtil {
 
 	private function loadMetadataFromFile($filePrefix, $regionCode, $countryCallingCode) {
 		$isNonGeoRegion = self::REGION_CODE_FOR_NON_GEO_ENTITY === $regionCode;
-		$source = $isNonGeoRegion ? $filePrefix . "_" . $countryCallingCode : $filePrefix . "_" . $regionCode;
+		$source = $isNonGeoRegion ? $filePrefix . "_" . $countryCallingCode . '.php' : $filePrefix . "_" . $regionCode . '.php';
 		if (is_readable($source)) {
 			$data = include $source;
 			$metadata = new PhoneMetadata();
@@ -2190,8 +2190,8 @@ class PhoneNumberUtil {
 	}
 
 	private function isNumberMatchingDesc($nationalNumber, PhoneNumberDesc $numberDesc) {
-		$possibleNumberPatternMatcher = preg_match('/^(' . $numberDesc->getPossibleNumberPattern() . ')$/x', $nationalNumber);
-		$nationalNumberPatternMatcher = preg_match('/^' . $numberDesc->getNationalNumberPattern() . '$/x', $nationalNumber);
+		$possibleNumberPatternMatcher = preg_match('/^(' . str_replace(array(PHP_EOL, ' '), '', $numberDesc->getPossibleNumberPattern()) . ')$/', $nationalNumber);
+		$nationalNumberPatternMatcher = preg_match('/^(' . str_replace(array(PHP_EOL, ' '), '', $numberDesc->getNationalNumberPattern()) . ')$/', $nationalNumber);
 		return $possibleNumberPatternMatcher && $nationalNumberPatternMatcher;
 	}
 
