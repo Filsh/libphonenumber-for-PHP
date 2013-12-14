@@ -21,6 +21,7 @@ Once you have configured the formatted you can use it by calling the format comp
 
 ```php
 $mPhoneNumber = Yii::app()->phoneNumber->parse('+380567934826', 'UA');
+
 $phoneNumber->validate($mPhoneNumber); // 'true' if valid number
 $phoneNumber->toE164($mPhoneNumber); // +380567934826
 $phoneNumber->toInternational($mPhoneNumber); // +380 56 793 4826
