@@ -11,6 +11,7 @@ require dirname(__FILE__) . '/Matcher.php';
 require dirname(__FILE__) . '/CountryCodeSource.php';
 require dirname(__FILE__) . '/PhoneNumberType.php';
 require dirname(__FILE__) . '/PhoneNumberFormat.php';
+require dirname(__FILE__) . '/NumberParseException.php';
 
 class libphonenumber {
   
